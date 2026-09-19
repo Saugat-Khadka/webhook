@@ -2,8 +2,11 @@ require ("dotenv").config();
 
 const webhookURL = process.env.DISCORD_WEBHOOK_URL;
 
+const user = "Saugat";
+const event = "Completed Webhook Project";
+
 const message = {
-    content : "Hello from my first Discord Webhook!"
+    content : `Hello from ${user}! ${event}`
 };
 
 fetch(webhookURL,{
