@@ -1,33 +1,54 @@
 require ("dotenv").config();
 
+const express = require("express");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
 const webhookURL = process.env.DISCORD_WEBHOOK_URL;
 
-const messageText = process.argv.slice(2).join("");
+app.use(express.json());
 
-if(!messageText){
-    console.log("No messgage text provided");
-    console.log("Usage: node index.js <message text>");
-    process.exit(1);
-}
+app.use(express.static("public"));
 
-const message = {
-    content : `New message from Node.js: ${messageText}`
-};
+app.post("/submit",async (req, res) =>{
+    const {name, message} = req.body;
 
-fetch(webhookURL,{
-    method : "POST",
-    headers : {
-        "Content-Type" : " application/json"
-    },
-    body : JSON.stringify(message)
-}
-).then(response => {
-    if(response.ok) {
-        console.log("Message sent successfully!");
-    } else {
-        console.log("Failed to send message.");
-        console.log("Status: ",response.status);
+    console.log("Received form submission");
+    console.log("Name: ", name);
+    console.log("Message: ", message);
+
+    const discordMessage = {
+        content : `New Form Submission:\nName: ${name}\nMessage: ${message}`
+    };
+
+    try {
+        const response = await fetch(webhookURL,{
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(discordMessage)
+        });
+        if (!response.ok) {
+            console.log("Discord webhook failed.");
+            return res.status(500).json({
+                message: "Failed to send message to Discord."
+            });
+        }
+        console.log("Message sent to Discord.");
+
+        res.json({
+            message: "Message sent successfully!"
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({
+            message: "Sommething went wrong."
+        });
     }
-}).catch(error => {
-    console.log("Error",error.message);
 });
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+})
