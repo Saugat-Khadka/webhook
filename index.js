@@ -2,11 +2,16 @@ require ("dotenv").config();
 
 const webhookURL = process.env.DISCORD_WEBHOOK_URL;
 
-const user = "Saugat";
-const event = "Completed Webhook Project";
+const messageText = process.argv.slice(2).join("");
+
+if(!messageText){
+    console.log("No messgage text provided");
+    console.log("Usage: node index.js <message text>");
+    process.exit(1);
+}
 
 const message = {
-    content : `Hello from ${user}! ${event}`
+    content : `New message from Node.js: ${messageText}`
 };
 
 fetch(webhookURL,{
